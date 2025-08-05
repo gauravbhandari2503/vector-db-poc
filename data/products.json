@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Mastering your Messaging",
+    "description": "A comprehensive guide to effective communication strategies.",
+    "transcript": "/data/mastering-your-messaging.txt"
+  },
+  {
+    "name": "Key Mistakes to Avoid When Fundraising： Tessa Clarke",
+    "description": "Insights from Tessa Clarke on common pitfalls in fundraising.",
+    "transcript": "/data/key-mistakes-to-avoid-when-fundraising-tess-clarke.txt"
+  },
+  {
+    "name": "Unlocking PMF",
+    "description": "Strategies for achieving Product-Market Fit.",
+    "transcript": "/data/unlocking-pmf.txt"
+  }
+]
