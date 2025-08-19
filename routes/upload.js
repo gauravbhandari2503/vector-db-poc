@@ -4,6 +4,7 @@ const fs = require('fs').promises;
 const path = require('path');
 const index = require('../pinecone');
 const getEmbedding = require('../embedding');
+const getImageEmbedding = require('../imageEmbedding');
 const products = require('../data/products.json');
 
 // Import chunking functions
@@ -55,6 +56,7 @@ router.post('/', async (req, res) => {
           values: embedding,
           metadata: {
             ...product,
+            type: 'text',
             chunkIndex: chunk.chunkIndex,
             totalChunks: chunk.totalChunks,
             isFullDocument: chunk.isFullDocument,
@@ -63,6 +65,31 @@ router.post('/', async (req, res) => {
             hasTranscript: transcriptContent !== ''
           }
         });
+      }
+      
+      // Create image embedding if image exists
+      if (product.image) {
+        try {
+          console.log(`Processing image embedding for ${product.image}`);
+          const imagePath = path.join(__dirname, '..', product.image);
+          const imageEmbedding = await getImageEmbedding(imagePath);
+          
+          allVectors.push({
+            id: `prod-${i}-image`,
+            values: imageEmbedding,
+            metadata: {
+              ...product,
+              type: 'image',
+              contentType: 'image',
+              hasTranscript: transcriptContent !== ''
+            }
+          });
+          
+          console.log(`✅ Image embedding created for ${product.name}`);
+        } catch (imageError) {
+          console.warn(`⚠️ Failed to create image embedding for ${product.image}:`, imageError.message);
+          // Continue processing other products even if image embedding fails
+        }
       }
     }
     

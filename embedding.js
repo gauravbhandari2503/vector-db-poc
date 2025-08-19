@@ -6,7 +6,7 @@ async function getEmbedding(text, inputType='search_document') {
     "https://api.cohere.ai/v1/embed",
     {
       texts: [text],
-      model: "embed-english-v3.0",
+      model: "embed-multilingual-v3.0",
       input_type: inputType, // 'search_document' or 'search_query'
     },
     {

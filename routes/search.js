@@ -54,26 +54,53 @@ router.get('/', async (req, res) => {
       });
     }
 
-    // Group results by product and show best chunks
+    // Group results by product and content type, show best chunks
     const groupedResults = {};
     relevantMatches.forEach(match => {
       const productName = match.metadata?.name || 'Unknown';
-      if (!groupedResults[productName] || match.score > groupedResults[productName].score) {
-        groupedResults[productName] = {
+      const contentType = match.metadata?.type || 'text';
+      const key = `${productName}-${contentType}`;
+      
+      if (!groupedResults[key] || match.score > groupedResults[key].score) {
+        groupedResults[key] = {
           id: match.id,
           score: match.score,
           name: match.metadata?.name || 'Unknown',
           description: match.metadata?.description || '',
+          type: contentType,
           chunkIndex: match.metadata?.chunkIndex,
           totalChunks: match.metadata?.totalChunks,
           contentLength: match.metadata?.contentLength || 0,
           hasTranscript: match.metadata?.hasTranscript || false,
-          isFullDocument: match.metadata?.isFullDocument || false
+          isFullDocument: match.metadata?.isFullDocument || false,
+          imageStyle: match.metadata?.imageStyle,
+          image: match.metadata?.image
         };
       }
     });
 
-    const matches = Object.values(groupedResults).sort((a, b) => b.score - a.score);
+    // Group by product for final output
+    const productGroups = {};
+    Object.values(groupedResults).forEach(result => {
+      const productName = result.name;
+      if (!productGroups[productName]) {
+        productGroups[productName] = {
+          name: productName,
+          description: result.description,
+          maxScore: result.score,
+          matches: []
+        };
+      }
+      productGroups[productName].matches.push(result);
+      productGroups[productName].maxScore = Math.max(productGroups[productName].maxScore, result.score);
+    });
+
+    const matches = Object.values(productGroups)
+      .sort((a, b) => b.maxScore - a.maxScore)
+      .map(group => ({
+        ...group,
+        matches: group.matches.sort((a, b) => b.score - a.score)
+      }));
 
     res.json({
       query: query,
